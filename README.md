@@ -209,7 +209,7 @@ docker run \
 
 
 This is the latest version of [SQlyog](https://www.webyog.com/product/sqlyog). SQLyog doesn't need any 3D graphics so we can
-skip initializing them. Also, it doesn't need privelged mode so no reason to give it that either.
+skip initializing them. Also, it doesn't need privileged mode so no reason to give it that either.
 
 
 ```
