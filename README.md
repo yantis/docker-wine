@@ -28,7 +28,6 @@ that launches a Skype on another machine (ie: on your local network. To use that
 
 
 ### Docker Images Structure
-
 >[yantis/archlinux-tiny](https://github.com/yantis/docker-archlinux-tiny)
 >>[yantis/archlinux-small](https://github.com/yantis/docker-archlinux-small)
 >>>[yantis/archlinux-small-ssh-hpn](https://github.com/yantis/docker-archlinux-ssh-hpn)
