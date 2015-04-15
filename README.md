@@ -87,7 +87,7 @@ This follows these docker conventions:
 * `-v ~/docker-data/wine:/home/docker/wine/` shared volume (folder) for your Window's programs data.
 * `-v /etc/localtime:/etc/localtime:ro \` sets the containers clock to match the hosts clock.
 * `-u docker` sets the user to docker.
-* 'yantis/wine /bin/bash -c "sudo initialize-graphics; vglrun /home/docker/templates/skype.template;"`
+* `yantis/wine /bin/bash -c "sudo initialize-graphics; vglrun /home/docker/templates/skype.template;"`
 Initialize the correct video drivers and launch the built in Skype run or install script.
 You could just as easily do any other program though.
 
