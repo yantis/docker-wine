@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Docker-wine by yantis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Docker-wine</h1>
+      <h2 class="project-tagline">Wine on Docker with Dynamic Graphics drivers and VirtualGL support for with both local and remote access.</h2>
+      <a href="https://github.com/yantis/docker-wine" class="btn">View on GitHub</a>
+      <a href="https://github.com/yantis/docker-wine/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/yantis/docker-wine/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="docker-wine" class="anchor" href="#docker-wine" aria-hidden="true"><span class="octicon octicon-link"></span></a>docker-wine</h1>
+
+<p><a href="https://www.winehq.org/">Wine</a> on Docker with <a href="https://github.com/yantis/docker-dynamic-video">Dynamic Graphic</a>
+drivers and <a href="https://github.com/yantis/docker-virtualgl">VirtualGL</a> with both local and remote support.</p>
+
+<p>It should work out of the box with all Nvidia cards and Nvidia drivers and most other cards as well that use Mesa drivers.
+It is setup to auto adapt to whatever drivers you may have installed as long as they are the most recent ones for your branch.</p>
+
+<p>On Docker hub <a href="https://registry.hub.docker.com/u/yantis/wine/">wine</a>
+on Github <a href="https://github.com/yantis/docker-wine/">docker-wine</a></p>
+
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
+
+<p>The goal of this was to be able to run Windows apps on my Linux box from anywhere in the world but seamless as if it was a local application.
+(That means no VNC or window managers etc). As an example maybe I want to run windows Skype on a remote server like an 
+Amazon EC2 so my IP address doesn't get leaked to to anyone using a Skype IP resolver. There are also a few programs that
+I like that just run on Windows.</p>
+
+<p>In local mode it should just work out of the box. Though you do need to setup a shared folder as a volume to store your windows data.
+All you should have to do is run <a href="https://github.com/yantis/docker-wine/blob/master/runme-explorer.sh">this</a> script and it will launch
+the windows explorer.</p>
+
+<p>I have included a <a href="https://github.com/yantis/docker-wine/blob/master/examples/aws-sqlyog.sh">demo script</a> 
+that will start up an Amazon EC2 micro Instance, install docker, run the container and then connect to your docker container
+and run SQLyog and outputting it on your local display.</p>
+
+<p><a href="https://github.com/yantis/docker-wine/blob/master/examples/remote-skype.sh">Here</a> is another demo script 
+that launches a Skype on another machine (ie: on your local network. To use that video card instead of your own)</p>
+
+<h3>
+<a id="docker-images-structure" class="anchor" href="#docker-images-structure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Docker Images Structure</h3>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-archlinux-tiny">yantis/archlinux-tiny</a></p>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-archlinux-small">yantis/archlinux-small</a></p>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-archlinux-ssh-hpn">yantis/archlinux-small-ssh-hpn</a></p>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-ssh-hpn-x">yantis/ssh-hpn-x</a></p>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-dynamic-video">yantis/dynamic-video</a></p>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-virtualgl">yantis/virtualgl</a></p>
+
+<blockquote>
+<p><a href="https://github.com/yantis/docker-wine">yantis/wine</a></p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<h2>
+<a id="usage-local" class="anchor" href="#usage-local" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage (Local)</h2>
+
+<p>This example launches the container and initializes the graphcs with your drivers and in this case
+runs Skype for Windows (Actually, it runs a script that sets it up if it isn't installed or runs it if it is)</p>
+
+<div class="highlight highlight-bash"><pre>xhost +si:localuser:<span class="pl-s"><span class="pl-pds">$(</span>whoami<span class="pl-pds">)</span></span> <span class="pl-k">&gt;</span>/dev/null
+docker run \
+    --privileged \
+    --rm \
+    -ti \
+    -e DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+    -v <span class="pl-k">~</span>/docker-data/wine:/home/docker/wine/ \
+    -v /etc/localtime:/etc/localtime:ro \
+    -u docker \
+    yantis/wine /bin/bash -c <span class="pl-s"><span class="pl-pds">"</span>sudo initialize-graphics &gt;/dev/null 2&gt;/dev/null; vglrun /home/docker/templates/skype.template;<span class="pl-pds">"</span></span></pre></div>
+
+<h3>
+<a id="breakdown" class="anchor" href="#breakdown" aria-hidden="true"><span class="octicon octicon-link"></span></a>Breakdown</h3>
+
+<div class="highlight highlight-bash"><pre>$ xhost +si:localuser:yourusername</pre></div>
+
+<p>Allows your local user to access the xsocket. Change yourusername or use $(whoami) or $USER if your shell supports it.</p>
+
+<div class="highlight highlight-bash"><pre>docker run \
+    --privileged \
+    --rm \
+    -ti \
+    -e DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+    -v <span class="pl-k">~</span>/docker-data/wine:/home/docker/wine/ \
+    -v /etc/localtime:/etc/localtime:ro \
+    -u docker \
+    yantis/wine /bin/bash -c <span class="pl-s"><span class="pl-pds">"</span>sudo initialize-graphics ; vglrun /home/docker/templates/skype.template;<span class="pl-pds">"</span></span></pre></div>
+
+<p>This follows these docker conventions:</p>
+
+<ul>
+<li>
+<code>-ti</code> will run an interactive session that can be terminated with CTRL+C.</li>
+<li>
+<code>--rm</code> will run a temporary session that will make sure to remove the container on exit.</li>
+<li>
+<code>-e DISPLAY</code> sets the host display to the local machines display.</li>
+<li>
+<code>-v /tmp/.X11-unix:/tmp/.X11-unix:ro</code> bind mounts the X11 socks on your local machine to the containers and makes it read only.</li>
+<li>
+<code>-v ~/docker-data/wine:/home/docker/wine/</code> shared volume (folder) for your Window's programs data.</li>
+<li>
+<code>-v /etc/localtime:/etc/localtime:ro \</code> sets the containers clock to match the hosts clock.</li>
+<li>
+<code>-u docker</code> sets the user to docker.</li>
+<li>
+<code>yantis/wine /bin/bash -c "sudo initialize-graphics; vglrun /home/docker/templates/skype.template;"</code>
+Initialize the correct video drivers and launch the built in Skype run or install script.
+You could just as easily do any other program though.</li>
+</ul>
+
+<h2>
+<a id="usage-remote" class="anchor" href="#usage-remote" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage (Remote)</h2>
+
+<h3>
+<a id="server" class="anchor" href="#server" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server</h3>
+
+<p>The recommended way to run this container looks like this. This example launches the container in the background.
+Warning: Do not run this on your primary computer as it will take over your video cards and you will have to shutdown the container
+to get them back.</p>
+
+<div class="highlight highlight-bash"><pre>docker run \
+    --privileged \
+    -ti \
+    --rm \
+    -v <span class="pl-smi">$HOME</span>/.ssh/authorized_keys:/authorized_keys:ro \
+    -p 49158:22 \
+    -v <span class="pl-k">~</span>/docker-data/wine:/home/docker/wine/ \
+    yantis/wine</pre></div>
+
+<p>This follows these docker conventions:</p>
+
+<ul>
+<li>
+<p><code>--privileged</code> run in privileged mode 
+If you do not want to run in privileged mode you can mess around with these:</p>
+
+<p>AWS</p>
+
+<ul>
+<li>--device=/dev/nvidia0:/dev/nvidia0 \</li>
+<li>--device=/dev/nvidiactl:/dev/nvidiactl \</li>
+<li>--device=/dev/nvidia-uvm:/dev/nvidia-uvm \</li>
+</ul>
+
+<p>OR (Local)</p>
+
+<ul>
+<li>--device=/dev/dri/card0:/dev/dri/card0 \</li>
+</ul>
+</li>
+<li><p><code>-d</code> run in daemon mode</p></li>
+<li>
+<code>-h docker</code> sets the hostname to docker. (not really required but it is nice to see where you are.)</li>
+<li>
+<code>-v $HOME/.ssh/authorized_keys:/authorized_keys:ro</code> Optionally share your public keys with the host.
+This is particularly useful when you are running this on another server that already has SSH. Like an 
+Amazon EC2 instance. WARNING: If you don't use this then it will just default to the user pass of docker/docker
+(If you do specify authorized keys it will disable all password logins to keep it secure).</li>
+<li>
+<code>-v /etc/localtime:/etc/localtime:ro</code> sets the containers clock to match the hosts clock.</li>
+<li>
+<code>-p 49158:22</code> port that you will be connecting to.</li>
+<li>
+<code>yantis/wine</code> the default mode is SSH server with the X-Server so no need to run any commands.</li>
+</ul>
+
+<h3>
+<a id="client" class="anchor" href="#client" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client</h3>
+
+<p>You will probably want to have VirtualGL installed on your client. Though this isn't mandatory for all apps.
+ie: For 2D apps you will not need this but for apps like Skype and most games you will.</p>
+
+<p>If you are just using 2D apps you can simply SSH in.</p>
+
+<div class="highlight highlight-bash"><pre>ssh -Y docker@hostname -p 49158 -t wine explorer.exe</pre></div>
+
+<p>If you are using 3D apps though you need to use VirtualGL.</p>
+
+<p>On Arch Linux it is:</p>
+
+<div class="highlight highlight-bash"><pre>pacman -S virtualgl</pre></div>
+
+<p>It is basically two programs you need both of which I have included in the <a href="https://github.com/yantis/docker-virtualgl/tree/master/tools">tools</a>
+directory on my <a href="https://github.com/yantis/docker-virtualgl">docker-virtualgl</a> repo</p>
+
+<ul>
+<li>SSH Authentication but data stream is unencrypted (recommended)</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>vglconnect -Y docker@hostname -p 49158 -t vglrun wine explorer.exe</pre></div>
+
+<ul>
+<li>SSH Authentication AND data stream is unencrypted</li>
+</ul>
+
+<div class="highlight highlight-bash"><pre>vglconnect -Y -s docker@hostname -p 49158 -t vglrun wine explorer.exe</pre></div>
+
+<p>If you are running this remotely (ie: with an Amazon AWS server) You will want to open up port on your firewall
+or router to get the best speed out of this.  Otherwise it will use SSH to encrypt the display which will slow it down a good amount.
+(I have had varying degrees of success not opening the port when using the SSH method (Sometimes I have to open up the port period to get it to work.)</p>
+
+<p>Check your ports as it doesn't always use 4242 sometimes it uses something else between 4200 and 4300.
+If your screen is black or it isn't drawing then that is a good indication that the port is blocked.</p>
+
+<p><img src="http://yantis-scripts.s3.amazonaws.com/virtualgl_port_forwarding.png" alt=""></p>
+
+<p>vglrun has a lot of tunable parameters. Make sure to check out the manual <a href="http://www.virtualgl.org/vgldoc/2_1/">here</a></p>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<p>This is the latest version of Skype on Windows (The Windows version has a lot of features that the Linux ones doesn't have
+like the ability to ability to set notifications based on keywords or ignore them completely for some groups).</p>
+
+<p>I have included sample scripts to run this locally, over SSH (ie: on another computer on your LAN) as well as a script
+to run it on an AWS micro instance if you are interested in protecting your privacy (it is very easy to query your IP
+address via one of the many Skype IP resolver sites out there).</p>
+
+<p>Skype actually needs 3D graphics support to work so we have to setup properly for that.</p>
+
+<pre><code>xhost +si:localuser:$(whoami) &gt;/dev/null
+docker run \
+    --privileged \
+    --rm \
+    -ti \
+    -e DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+    -v ~/docker-data/wine:/home/docker/wine/ \
+    -v /etc/localtime:/etc/localtime:ro \
+    -u docker \
+    yantis/wine /bin/bash -c "sudo initialize-graphics &gt;/dev/null 2&gt;/dev/null; vglrun /home/docker/templates/skype.template;"
+</code></pre>
+
+<p><img src="http://yantis-scripts.s3.amazonaws.com/skype_on_wine.png" alt=""></p>
+
+<p>This is the latest version of <a href="https://www.webyog.com/product/sqlyog">SQlyog</a>. SQLyog doesn't need any 3D graphics so we can
+skip initializing them. Also, it doesn't need privelged mode so no reason to give it that either.</p>
+
+<pre><code>xhost +si:localuser:$(whoami) &gt;/dev/null
+docker run \
+    --rm \
+    -ti \
+    -e DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+    -v ~/docker-data/wine:/home/docker/wine/ \
+    -u docker \
+    yantis/wine sh /home/docker/templates/sqlyog.template
+</code></pre>
+
+<p><img src="http://yantis-scripts.s3.amazonaws.com/sqlyog_screenshot.png" alt=""></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/yantis/docker-wine">Docker-wine</a> is maintained by <a href="https://github.com/yantis">yantis</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
