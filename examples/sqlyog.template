@@ -1,0 +1,46 @@
+#!/bin/bash
+
+############################################################
+# Copyright (c) 2015 Jonathan Yantis
+# Released under the MIT license
+############################################################
+
+# Set our wineprefix to point to one just for this program
+export WINEPREFIX=/home/docker/wine/sqlyog
+export WINEARCH='win32'
+
+# Check if the user has skype installed and if they do not then set it up
+if [ ! -f /home/docker/wine/sqlyog/drive_c/sqlyog/SQLyogCommunity.exe ]
+then
+    # Skype needs corefonts and liberation fonts to work
+     winetricks liberation corefonts
+
+    # Optionally install all the fonts
+    # winetricks allfonts
+
+    # Enable subpixel font smoothing for RGB (not sure a noticable difference)
+    # winetricks fontsmooth=rgb
+
+    # Skype needed richedit controls or you can't type messages or split windows.
+    #  winetricks msftedit
+
+    # SQLyog needs this.
+    winetricks native_mdac
+
+    # Download community version.
+    # https://github.com/webyog/sqlyog-community/wiki/Downloads
+
+    mkdir -p /home/docker/wine/sqlyog/drive_c/sqlyog
+    cd /home/docker/wine/sqlyog/drive_c/sqlyog
+    curl -o setup https://s3.amazonaws.com/SQLyog_Community/SQlyog+12.1.0/SQLyog-12.1.0-0.x86Community.exe && \
+    7z x /home/docker/wine/sqlyog/drive_c/sqlyog/setup
+    rm /home/docker/wine/sqlyog/drive_c/sqlyog/setup
+fi
+
+# Run SQLyog
+wine /home/docker/wine/sqlyog/drive_c/sqlyog/SQLyogCommunity.exe
+
+# You could also run it with the --dir if you wanted to control where the config files load and save from.
+# wine SQLyog.exe --dir z:/shared
+
+exit
