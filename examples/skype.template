@@ -26,7 +26,7 @@ then
 
     # Download Skype from technet.(Supposed to be a silent install but it isn't so follow the dialogs
     cd /home/docker/wine/skype/drive_c/
-    wget -nc "https://gallery.technet.microsoft.com/Skype-63-Silent-Installer-74a99dcd/file/135930/1/Skype%207.3.32.101%20silent.exe"
+    wget -nc "https://gallery.technet.microsoft.com/Skype-63-Silent-Installer-74a99dcd/file/142608/12/Skype%207.18.32.112%20silent.exe"
 
     # Launch the setup
     wine /home/docker/wine/skype/drive_c/Skype\ 7.3.32.101\ silent.exe
